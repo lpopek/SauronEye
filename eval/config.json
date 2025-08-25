@@ -1,0 +1,5 @@
+{
+  "models": ["yolo11n.pt"],
+  "trackers": ["botsort.yaml", "bytetrack.yaml"],
+  "dataset_path": "../datasets/MOT15"
+}

@@ -1,1 +1,11 @@
-**/models/
+.venv
+
+__pycache__/
+
+*.log
+
+*.env
+
+models/
+results/
+datasets/
