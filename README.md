@@ -44,3 +44,7 @@ python3 eval/eval.py
 from the project's root directory. You can also call the script from wherever you
 want, as all of the paths used in the script are *absolute paths*, so it should 
 work just fine.
+
+For configuring the tracker `.yaml` files visit the official [YOLO documentation](https://docs.ultralytics.com/modes/track/#tracker-selection:~:text=of%20each%20parameter.-,Tracker%20Arguments,-Some%20tracking%20behaviors)
+
+Supported MOT datasets can be found on the official [MOT Challenge website](https://motchallenge.net/)
