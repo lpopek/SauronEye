@@ -1,6 +1,0 @@
-[submodule "eval/TrackEval"]
-	path = eval/TrackEval
-	url = https://github.com/JonathonLuiten/TrackEval.git
-[submodule "deps/TrackEval"]
-	path = deps/TrackEval
-	url = https://github.com/JonathonLuiten/TrackEval.git

@@ -11,6 +11,7 @@ from ultralytics import YOLO
 
 CURRENT_DIR = pathlib.Path(__file__).parent.resolve()
 MODEL_DIR: str = os.path.join(CURRENT_DIR, "models")
+TRACKERS_DIR: str = os.path.join(CURRENT_DIR, "trackers")
 DATASET_DIR: str = os.path.abspath(os.path.join(CURRENT_DIR, "../datasets"))
 RESULTS_DIR: str = os.path.join(CURRENT_DIR, "results")
 
@@ -95,7 +96,7 @@ def GetTrackers(config: dict) -> list[str]:
             raise Exception("Config error: all trackers "
                 + "should have a .yaml file extension.")
         
-    return trackers
+    return [os.path.join(TRACKERS_DIR, tracker) for tracker in trackers]
 
 
 
@@ -124,8 +125,9 @@ def CreateOutputDirectory(
 ) -> str:
     output_directory = RESULTS_DIR
     output_directory = os.path.join(output_directory, model_name)
-    output_directory = os.path.join(output_directory, tracker_name)
     output_directory = os.path.join(output_directory, dataset_name)
+    output_directory = os.path.join(output_directory, tracker_name)
+    output_directory = os.path.join(output_directory, "data")
     try: os.makedirs(output_directory)
     except FileExistsError: pass
     return output_directory
@@ -150,21 +152,26 @@ def EvaluateModels(
         model_name, _ = os.path.splitext(os.path.basename(model_path))
         LOGGER.info("Evaluating " + model_name)
         
-        model = YOLO(model_path)
-        
         for tracker in trackers:
+            
             tracker_name, _ = os.path.splitext(os.path.basename(tracker))
             LOGGER.info("Attached tracker: " + tracker_name)
             output_directory: str = CreateOutputDirectory(model_name, tracker_name, dataset_name)
 
             for scene in scene_paths:
+
+                model = YOLO(model_path)
+                
                 scene_name = os.path.basename(scene)
                 LOGGER.info("Evaluating scene " + scene)
                 output_file = open(os.path.join(output_directory, scene_name + ".txt"), "w+")
 
+                print(tracker)
+
                 results = model.track(
                     source=os.path.join(scene, "img1"),
                     tracker=tracker,
+                    classes=[0], # only detect 'pearson' class
                     persist=True
                 )
 
@@ -173,14 +180,20 @@ def EvaluateModels(
 
                     boxes = result.boxes.xywh.cpu().numpy()
                     confs = [conf * 100 for conf in result.boxes.conf.cpu().numpy()] # YOLO outputs normalized 0-1 values, MOT expects 0-100
+                    if result.boxes.id is not None:
+                        ids = [id for id in result.boxes.id.cpu().numpy()]
+                    else:
+                        ids = [-1 for _ in range(len(boxes))]
 
                     for i in range(len(boxes)):
                         x_center, y_center, width, height = boxes[i]
                         x = x_center - (width / 2)
                         y = y_center - (height / 2)
 
+                        if ids[i] == -1: continue
+
                         output_file.write(
-                            f"{frame_index + 1},-1,{x:.3f},{y:.3f},{width:.3f},{height:.3f},{confs[i]:.3f},-1,-1,-1\n"
+                            f"{frame_index + 1},{int(ids[i])},{x:.3f},{y:.3f},{width:.3f},{height:.3f},{confs[i]:.3f},-1,-1,-1\n"
                         )
 
                 output_file.close()
