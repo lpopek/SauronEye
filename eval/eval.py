@@ -35,8 +35,8 @@ LOGGER: logging.Logger = logging.getLogger(__name__)
 
 def LoadConfig() -> dict:
     LOGGER.info("Loading config.json")
-    with open(os.path.join(CURRENT_DIR, "config.json")) as json_file:
-        try: config = json.load(json_file)
+    with open(os.path.join(CURRENT_DIR, "config.json")) as jsonFile:
+        try: config = json.load(jsonFile)
         except: raise Exception("Invalid config.json file")
     return config
 
@@ -59,17 +59,17 @@ def GetModelPaths(config: dict) -> list[str]:
         raise Exception("Config error: 'models' " 
             + "property is an empty list.")
 
-    for model_name in models:
-        if not isinstance(model_name, str):
+    for modelName in models:
+        if not isinstance(modelName, str):
             raise Exception("Config error: 'models' " 
                 + "list should only contain strings.")
         
-        _, file_extension = os.path.splitext(model_name)
-        if file_extension != ".pt":
+        _, fileExtension = os.path.splitext(modelName)
+        if fileExtension!= ".pt":
             raise Exception("Config error: all models " 
                 + "should have a '.pt' file extension.")
     
-    return [os.path.join(MODEL_DIR, model_name) for model_name in models]
+    return [os.path.join(MODEL_DIR, modelName) for modelName in models]
 
 
 
@@ -86,12 +86,12 @@ def GetTrackers(config: dict) -> list[str]:
         raise Exception("Config error: 'trackers' "
             + "property is an empty list.")
     
-    for tracker_name in trackers:
-        if not isinstance(tracker_name, str):
+    for trackerName in trackers:
+        if not isinstance(trackerName, str):
             raise Exception("Config error: 'trackers' "
                 + "list should only contain strings.")
         
-        _, file_extension = os.path.splitext(tracker_name)
+        _, file_extension = os.path.splitext(trackerName)
         if file_extension != ".yaml":
             raise Exception("Config error: all trackers "
                 + "should have a .yaml file extension.")
@@ -119,52 +119,52 @@ def GetDatasetPath(config: dict) -> str:
 
 
 def CreateOutputDirectory(
-    model_name: str, 
-    tracker_name: str, 
-    dataset_name: str
+    modelName: str, 
+    trackerName: str, 
+    datasetName: str
 ) -> str:
-    output_directory = RESULTS_DIR
-    output_directory = os.path.join(output_directory, model_name)
-    output_directory = os.path.join(output_directory, dataset_name)
-    output_directory = os.path.join(output_directory, tracker_name)
-    output_directory = os.path.join(output_directory, "data")
-    try: os.makedirs(output_directory)
+    outputDirectory = RESULTS_DIR
+    outputDirectory = os.path.join(outputDirectory, modelName)
+    outputDirectory = os.path.join(outputDirectory, datasetName)
+    outputDirectory = os.path.join(outputDirectory, trackerName)
+    outputDirectory = os.path.join(outputDirectory, "data")
+    try: os.makedirs(outputDirectory)
     except FileExistsError: pass
-    return output_directory
+    return outputDirectory 
 
 
 
 
 def EvaluateModels(
-    model_paths: list[str], 
+    modelPaths: list[str], 
     trackers: list[str], 
-    dataset_path: str
+    datasetPath: str
 ) -> None:
     LOGGER.info("Starting evaluation") 
 
-    dataset_name: str = os.path.basename(dataset_path)
-    scene_paths: list[str] = [
-        os.path.join(dataset_path, path) for path in os.listdir(dataset_path) 
-        if os.path.isdir(os.path.join(dataset_path, path))
+    datasetName: str = os.path.basename(datasetPath)
+    scenePaths: list[str] = [
+        os.path.join(datasetPath, path) for path in os.listdir(datasetPath) 
+        if os.path.isdir(os.path.join(datasetPath, path))
     ]
 
-    for model_path in model_paths:
-        model_name, _ = os.path.splitext(os.path.basename(model_path))
-        LOGGER.info("Evaluating " + model_name)
+    for modelPath in modelPaths:
+        modelName, _ = os.path.splitext(os.path.basename(modelPath))
+        LOGGER.info("Evaluating " + modelName)
         
         for tracker in trackers:
             
-            tracker_name, _ = os.path.splitext(os.path.basename(tracker))
-            LOGGER.info("Attached tracker: " + tracker_name)
-            output_directory: str = CreateOutputDirectory(model_name, tracker_name, dataset_name)
+            trackerName, _ = os.path.splitext(os.path.basename(tracker))
+            LOGGER.info("Attached tracker: " + trackerName)
+            outputDirectory : str = CreateOutputDirectory(modelName, trackerName, datasetName)
 
-            for scene in scene_paths:
+            for scene in scenePaths:
 
-                model = YOLO(model_path)
+                model = YOLO(modelPath)
                 
-                scene_name = os.path.basename(scene)
+                sceneName = os.path.basename(scene)
                 LOGGER.info("Evaluating scene " + scene)
-                output_file = open(os.path.join(output_directory, scene_name + ".txt"), "w+")
+                outputFile = open(os.path.join(outputDirectory, sceneName+ ".txt"), "w+")
 
                 print(tracker)
 
@@ -175,7 +175,7 @@ def EvaluateModels(
                     persist=True
                 )
 
-                for frame_index, result in enumerate(results):
+                for frameIndex, result in enumerate(results):
                     if result.boxes == None: continue
 
                     boxes = result.boxes.xywh.cpu().numpy()
@@ -186,17 +186,17 @@ def EvaluateModels(
                         ids = [-1 for _ in range(len(boxes))]
 
                     for i in range(len(boxes)):
-                        x_center, y_center, width, height = boxes[i]
-                        x = x_center - (width / 2)
-                        y = y_center - (height / 2)
+                        xCenter, yCenter, width, height = boxes[i]
+                        x = xCenter - (width / 2)
+                        y = yCenter - (height / 2)
 
                         if ids[i] == -1: continue
 
-                        output_file.write(
-                            f"{frame_index + 1},{int(ids[i])},{x:.3f},{y:.3f},{width:.3f},{height:.3f},{confs[i]:.3f},-1,-1,-1\n"
+                        outputFile.write(
+                            f"{frameIndex + 1},{int(ids[i])},{x:.3f},{y:.3f},{width:.3f},{height:.3f},{confs[i]:.3f},-1,-1,-1\n"
                         )
 
-                output_file.close()
+                outputFile.close()
 
 
 
@@ -210,7 +210,7 @@ def main() -> None:
             + traceback.format_exc())
         return
 
-    try: model_paths: list[str] = GetModelPaths(config)
+    try: modelPaths: list[str] = GetModelPaths(config)
     except Exception: 
         LOGGER.error("Invalid config.json file\n\n" 
             + traceback.format_exc())
@@ -222,16 +222,16 @@ def main() -> None:
             + traceback.format_exc())
         return
 
-    try: dataset_path: str = GetDatasetPath(config)
+    try: datasetPath: str = GetDatasetPath(config)
     except Exception:
         LOGGER.error("Invalid config.json file\n\n" 
             + traceback.format_exc())
         return
 
     EvaluateModels(
-        model_paths, 
+        modelPaths, 
         trackers, 
-        dataset_path
+        datasetPath 
     )
 
 
