@@ -1,0 +1,11 @@
+tracker_type: bytetrack
+track_high_thresh: 0.6
+track_low_thresh: 0.2
+new_track_thresh: 0.6
+track_buffer: 10
+match_thresh: 0.4
+fuse_score: True
+gmc_method: orb
+proximity_thresh: 0.2
+appearance_thresh: 0.4
+with_reid: True
