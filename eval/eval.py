@@ -12,7 +12,6 @@ from ultralytics import YOLO
 CURRENT_DIR = pathlib.Path(__file__).parent.resolve()
 MODEL_DIR: str = os.path.join(CURRENT_DIR, "models")
 TRACKERS_DIR: str = os.path.join(CURRENT_DIR, "trackers")
-DATASET_DIR: str = os.path.abspath(os.path.join(CURRENT_DIR, "../datasets"))
 RESULTS_DIR: str = os.path.join(CURRENT_DIR, "results")
 
 
@@ -123,11 +122,13 @@ def CreateOutputDirectory(
     trackerName: str, 
     datasetName: str
 ) -> str:
-    outputDirectory = RESULTS_DIR
-    outputDirectory = os.path.join(outputDirectory, modelName)
-    outputDirectory = os.path.join(outputDirectory, datasetName)
-    outputDirectory = os.path.join(outputDirectory, trackerName)
-    outputDirectory = os.path.join(outputDirectory, "data")
+    outputDirectory: str = os.path.join(
+        RESULTS_DIR, 
+        modelName, 
+        datasetName, 
+        trackerName, 
+        "data"
+    )
     try: os.makedirs(outputDirectory)
     except FileExistsError: pass
     return outputDirectory 
@@ -161,6 +162,7 @@ def EvaluateModels(
             for scene in scenePaths:
 
                 model = YOLO(modelPath)
+                model.to("cuda")
                 
                 sceneName = os.path.basename(scene)
                 LOGGER.info("Evaluating scene " + scene)

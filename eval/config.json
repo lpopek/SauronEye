@@ -1,5 +1,5 @@
 {
   "models": ["yolo11n.pt"],
-  "trackers": ["bytetrack.yaml"],
+  "trackers": ["test_tracker.yaml"],
   "dataset_path": "../../evaluation/MOTA/MOT15/MOT15-train"
 }
