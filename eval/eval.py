@@ -10,8 +10,8 @@ from ultralytics import YOLO
 
 
 CURRENT_DIR = pathlib.Path(__file__).parent.resolve()
-MODEL_DIR: str = os.path.join(CURRENT_DIR, "models")
-TRACKERS_DIR: str = os.path.join(CURRENT_DIR, "trackers")
+MODEL_DIR: str = os.path.abspath(os.path.join(CURRENT_DIR, "../models"))
+TRACKERS_DIR: str = os.path.abspath(os.path.join(CURRENT_DIR, "../trackers"))
 RESULTS_DIR: str = os.path.join(CURRENT_DIR, "results")
 
 
