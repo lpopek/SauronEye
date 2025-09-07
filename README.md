@@ -48,3 +48,17 @@ work just fine.
 For configuring the tracker `.yaml` files visit the official [YOLO documentation](https://docs.ultralytics.com/modes/track/#tracker-selection:~:text=of%20each%20parameter.-,Tracker%20Arguments,-Some%20tracking%20behaviors)
 
 Supported MOT datasets can be found on the official [MOT Challenge website](https://motchallenge.net/)
+
+## tune
+Tune directory contains all of the code related to tuning tracker hyperparameters. It utilizes eval
+scripts and TrackEval repository to find the best tracker settings based on its MOTA score.
+
+To enable tuning:
+1. Go to `eval/trackers` directory and add `test_tracker.yaml` file if it doesn't already exist
+2. In `eval/config.json` file change `trackers` value to `["test_tracker.yaml"]`
+3. Update the rest of the configuration file if needed
+3. Run `python tune/tune.py` from the projects root directory.
+
+The script will automatically modify `eval/trackers/test_tracker.yaml` file and evaluate it with
+the scripts mentioned above. The results of each tuning pass will be written into the `tune/tune.log`
+file.
