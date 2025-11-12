@@ -4,6 +4,8 @@ import pathlib
 import logging
 import traceback
 
+import sys
+
 from ultralytics import YOLO
 
 
@@ -173,7 +175,7 @@ def EvaluateModels(
                 results = model.track(
                     source=os.path.join(scene, "img1"),
                     tracker=tracker,
-                    classes=[0], # only detect 'pearson' class
+                    classes=[0], # only detect 'person' class
                     persist=True
                 )
 
