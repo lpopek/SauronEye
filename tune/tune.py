@@ -70,7 +70,7 @@ def runEvalSctips() -> None:
         "/workspace/miniconda/bin/conda", "run", "-n", "py37env", 
         "python", trackEvalScriptPath,
         "--GT_FOLDER", "/workspace/evaluation/MOTA/MOT15", 
-        "--TRACKERS_FOLDER", "/workspace/SauronEye/eval/results/yolo11n",
+        "--TRACKERS_FOLDER", "/workspace/SauronEye/eval/results/best",
         "--BENCHMARK", "MOT15", 
         "--TRACKERS_TO_EVAL", "test_tracker"
     ]
@@ -85,37 +85,38 @@ def getMotaResults() -> float:
             return float(row["MOTA"])
 
 def evaluate(trackerConfig: dict) -> None:
-    writeYaml(trackerConfig)
+    # writeYaml(trackerConfig)
     runEvalSctips()
-    return getMotaResults()
+    # return getMotaResults()
 
 def main():
     LOGGER.info("Starting main")
+    evaluate(getDefaultSetup())
 
-    LOGGER.info("Evaluating base setup")
-    setup: dict = getDefaultSetup()
-    bestSetup: dict = copy.deepcopy(setup)
-    bestMOTA: float = evaluate(setup)
-    LOGGER.info(f"Achieved base MOTA score of {bestMOTA} with setup:\n {setup}")
+    # LOGGER.info("Evaluating base setup")
+    # setup: dict = getDefaultSetup()
+    # bestSetup: dict = copy.deepcopy(setup)
+    # bestMOTA: float = evaluate(setup)
+    # LOGGER.info(f"Achieved base MOTA score of {bestMOTA} with setup:\n {setup}")
 
-    for key in AVAILABLE_SETUP_OPTIONS:
-        options: list = AVAILABLE_SETUP_OPTIONS[key]
-        for index in range(len(options)):
-            LOGGER.info(f"Evaluating {key}-{options[index]}")
+    # for key in AVAILABLE_SETUP_OPTIONS:
+    #     options: list = AVAILABLE_SETUP_OPTIONS[key]
+    #     for index in range(len(options)):
+    #         LOGGER.info(f"Evaluating {key}-{options[index]}")
 
-            setup[key] = options[index]
-            setupMOTA: float = evaluate(setup)
+    #         setup[key] = options[index]
+    #         setupMOTA: float = evaluate(setup)
 
-            LOGGER.info(f"MOTA result: {setupMOTA}")
-            if setupMOTA > bestMOTA:
-                LOGGER.info(f"New MOTA best with setup:\n{setup}")
+    #         LOGGER.info(f"MOTA result: {setupMOTA}")
+    #         if setupMOTA > bestMOTA:
+    #             LOGGER.info(f"New MOTA best with setup:\n{setup}")
 
-                bestSetup = copy.deepcopy(setup)
-                bestMOTA = setupMOTA
-        setup = copy.deepcopy(bestSetup)
+    #             bestSetup = copy.deepcopy(setup)
+    #             bestMOTA = setupMOTA
+    #     setup = copy.deepcopy(bestSetup)
 
-    LOGGER.info(f"Found best setup:\n {setup}\n\n"
-        + f"with the overall MOTA score of {bestMOTA}")
+    # LOGGER.info(f"Found best setup:\n {setup}\n\n"
+    #     + f"with the overall MOTA score of {bestMOTA}")
 
 if __name__ == "__main__":
     LOGGER.info("Running script: " + __file__)
